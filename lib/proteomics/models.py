@@ -1,8 +1,6 @@
 """
-Mapping from schema to objects.
+Domain models.
 """
-from .schema import metadata, tables
-from sqlalchemy.orm import mapper, relationship
 
 
 class Protein(object):
@@ -22,32 +20,24 @@ class Digest(object):
         self.id = id
 
 class ProteinInstance(object):
+    """
+    A protein instance is a single occurence of a protein
+    that occurs within a dataset. Typically this dataset
+    is a genome.
+    We use protein records because the same protein can appear multiple
+    times w/in a genome.
+    """
     def __init__(self, protein=None, genome=None, metadata=None):
         self.protein = protein
         self.genome = genome
         self.metadata = metadata
 
 class DigestProduct(object):
+    """
+    We represent the products of a digest as 
+    protein-digest-peptide triples.
+    """
     def __init__(self, protein, digest, peptide):
         self.protein = protein
         self.digest = digset
         self.peptide = peptide
-
-mapper(Protein, tables['proteins'])
-
-mapper(Peptide, tables['peptides'])
-
-mapper(Genome, tables['genomes'])
-
-mapper(Digest, tables['digests'])
-
-mapper(ProteinInstance, tables['protein_instances'], properties={
-    'protein': relationship(Protein),
-    'genome': relationship(Genome)
-})
-
-mapper(DigestProduct, tables['digest_products'], properties={
-    'protein': relationship(Protein),
-    'digest': relationship(Genome),
-    'peptide': relationship(Peptide)
-})
