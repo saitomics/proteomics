@@ -34,15 +34,11 @@ tables['digests'] = Table(
 )
 
 """
-Here comes the Greek...
-A 'Proteolysis' is the breakdown of a protein into sub-entities.
-These sub-entities are typically peptides.
-We represent a proteolysis_product as a
-protein-digest-peptide triple.
+We represent the results of a digest as 
+protein-digest-peptide triples.
 """
-tables['proteolysis_products'] = Table(
-    'proteolysis_products', metadata,
-    # Composite foreign-key for proteolyses.
+tables['digest_products'] = Table(
+    'digest_products', metadata,
     Column('protein_sequence', String, 
            ForeignKey('proteins.sequence'), primary_key=True),
     Column('digest_id', String,
