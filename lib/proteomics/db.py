@@ -37,12 +37,14 @@ tables = {}
 
 tables['proteins'] = Table(
     'proteins', metadata,
-    Column('sequence', String, primary_key=True)
+    Column('id', Integer, primary_key=True),
+    Column('sequence', String)
 )
 
 tables['peptides'] = Table(
     'peptides', metadata,
-    Column('sequence', String, primary_key=True)
+    Column('id', Integer, primary_key=True),
+    Column('sequence', String)
 )
 
 tables['genomes'] = Table(
@@ -55,24 +57,20 @@ tables['digests'] = Table(
     Column('id', String, primary_key=True)
 )
 
-tables['digest_products'] = Table(
-    'digest_products', metadata,
-    Column('protein_sequence', String, 
-           ForeignKey('proteins.sequence'), primary_key=True),
-    Column('digest_id', String,
-           ForeignKey('digests.id'), primary_key=True),
-    Column('peptide_sequence', String, 
-           ForeignKey('peptides.sequence'), primary_key=True),
-)
-
 tables['protein_instances'] = Table(
     'protein_instances', metadata,
     Column('id', Integer, primary_key=True),
-    Column('protein_sequence', String, 
-           ForeignKey('proteins.sequence')),
-    Column('genome_id', String, 
-           ForeignKey('genomes.id')),
+    Column('protein_sequence', String, ForeignKey('proteins.sequence')),
+    Column('genome_id', String, ForeignKey('genomes.id')),
     Column('metadata', String),
+)
+
+tables['peptide_instances'] = Table(
+    'digest_products', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('protein_sequence', String, ForeignKey('proteins.sequence')),
+    Column('digest_id', String, ForeignKey('digests.id')),
+    Column('peptide_sequence', String, ForeignKey('peptides.sequence')),
 )
 
 
@@ -90,7 +88,7 @@ mapper(models.ProteinInstance, tables['protein_instances'], properties={
     'genome': relationship(models.Genome)
 })
 
-mapper(models.DigestProduct, tables['digest_products'], properties={
+mapper(models.DigestProduct, tables['peptide_instances'], properties={
     'protein': relationship(models.Protein),
     'digest': relationship(models.Genome),
     'peptide': relationship(models.Peptide)

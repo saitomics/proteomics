@@ -4,11 +4,13 @@ Domain models.
 
 
 class Protein(object):
-    def __init__(self, sequence=None):
+    def __init__(self, id=None, sequence=None):
+        self.id = id
         self.sequence = sequence
 
 class Peptide(object):
-    def __init__(self, sequence=None):
+    def __init__(self, id=None, sequence=None):
+        self.id = id
         self.sequence = sequence
 
 class Genome(object):
@@ -27,17 +29,20 @@ class ProteinInstance(object):
     We use protein records because the same protein can appear multiple
     times w/in a genome.
     """
-    def __init__(self, protein=None, genome=None, metadata=None):
+    def __init__(self, id=None, protein=None, genome=None, metadata=None):
+        self.id = id
         self.protein = protein
         self.genome = genome
         self.metadata = metadata
 
-class DigestProduct(object):
+class PeptideInstance(object):
     """
-    We represent the products of a digest as 
-    protein-digest-peptide triples.
+    A protein instance is a single occurence of a protein
+    that occurs within a set peptides. Typically this set
+    is the result of a protein digestion.
     """
-    def __init__(self, protein, digest, peptide):
+    def __init__(self, id=None, protein=None, digest=None, peptide=None):
+        self.id = id
         self.protein = protein
         self.digest = digset
         self.peptide = peptide
