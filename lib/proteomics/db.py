@@ -11,6 +11,8 @@ from sqlalchemy import (MetaData, Table, Column, Integer, String, ForeignKey)
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import object_session 
+from sqlalchemy.orm.util import has_identity 
 
 engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 session = scoped_session(sessionmaker(bind=engine))
@@ -18,17 +20,28 @@ session = scoped_session(sessionmaker(bind=engine))
 def get_session():
     return session()
 
-def init_db():
-    metadata.create_all(bind=engine, checkfirst=True)
+def init_db(bind=engine):
+    metadata.create_all(bind=bind, checkfirst=True)
 
-def clear_db():
-    metadata.drop_all(bind=engine)
+def clear_db(bind=engine):
+    metadata.drop_all(bind=bind)
 
 def get_session_w_external_trans(orig_session):
     con = orig_session.bind.connect()
     trans = con.begin()
     new_session = sessionmaker()(bind=con)
     return con, trans, new_session
+
+def get_obj_state(obj):
+    if object_session(obj) is None and not has_identity(obj):
+        return 'transient'
+    elif object_session(obj) is not None and not has_identity(obj):
+        return 'pending'
+    elif object_session(obj) is None and has_identity(obj):
+        return 'detached'
+    elif object_session(obj) is not None and has_identity(obj):
+        return 'persistent'
+
 
 # Define tables.
 metadata = MetaData()
@@ -37,13 +50,13 @@ tables = {}
 
 tables['proteins'] = Table(
     'proteins', metadata,
-    Column('id', Integer, primary_key=True),
+    Column('id', String, primary_key=True),
     Column('sequence', String)
 )
 
 tables['peptides'] = Table(
     'peptides', metadata,
-    Column('id', Integer, primary_key=True),
+    Column('id', String, primary_key=True),
     Column('sequence', String)
 )
 
@@ -88,8 +101,8 @@ mapper(models.ProteinInstance, tables['protein_instances'], properties={
     'genome': relationship(models.Genome)
 })
 
-mapper(models.DigestProduct, tables['peptide_instances'], properties={
+mapper(models.PeptideInstance, tables['peptide_instances'], properties={
     'protein': relationship(models.Protein),
-    'digest': relationship(models.Genome),
+    'digest': relationship(models.Digest),
     'peptide': relationship(models.Peptide)
 })

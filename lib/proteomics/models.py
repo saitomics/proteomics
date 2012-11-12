@@ -5,13 +5,13 @@ Domain models.
 
 class Protein(object):
     def __init__(self, id=None, sequence=None):
-        self.id = id
         self.sequence = sequence
+        self.id = id or self.sequence
 
 class Peptide(object):
     def __init__(self, id=None, sequence=None):
-        self.id = id
         self.sequence = sequence
+        self.id = id or self.sequence
 
 class Genome(object):
     def __init__(self, id=None):
