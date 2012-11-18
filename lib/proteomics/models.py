@@ -13,7 +13,7 @@ class Peptide(object):
         self.sequence = sequence
         self.id = id or self.sequence
 
-class Genome(object):
+class Proteome(object):
     def __init__(self, id=None):
         self.id = id
 
@@ -25,14 +25,14 @@ class ProteinInstance(object):
     """
     A protein instance is a single occurence of a protein
     that occurs within a dataset. Typically this dataset
-    is a genome.
+    is a proteome.
     We use protein records because the same protein can appear multiple
-    times w/in a genome.
+    times w/in a proteome.
     """
-    def __init__(self, id=None, protein=None, genome=None, metadata=None):
+    def __init__(self, id=None, protein=None, proteome=None, metadata=None):
         self.id = id
         self.protein = protein
-        self.genome = genome
+        self.proteome = proteome
         self.metadata = metadata
 
 class PeptideInstance(object):

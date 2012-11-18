@@ -17,7 +17,7 @@ class FastaIngestServiceTestCase(DBTestCase):
         ingest_service = FastaIngestService()
         actual = ingest_service.ingest(
             fasta_file=self.fasta_file,
-            genome=None,
+            proteome=None,
             session=db.session()
         )
         expected = {

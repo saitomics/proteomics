@@ -68,8 +68,8 @@ tables['peptides'] = Table(
            server_onupdate=text('current_timestamp')),
 )
 
-tables['genomes'] = Table(
-    'genomes', metadata,
+tables['proteomes'] = Table(
+    'proteomes', metadata,
     Column('id', String, primary_key=True),
     Column('created', DateTime, server_default=text('current_timestamp')),
     Column('modified', DateTime, server_default=text('current_timestamp'),
@@ -88,7 +88,7 @@ tables['protein_instances'] = Table(
     'protein_instances', metadata,
     Column('id', Integer, primary_key=True),
     Column('protein_sequence', String, ForeignKey('proteins.sequence')),
-    Column('genome_id', String, ForeignKey('genomes.id')),
+    Column('proteome_id', String, ForeignKey('proteomes.id')),
     Column('metadata', String),
     Column('created', DateTime, server_default=text('current_timestamp')),
     Column('modified', DateTime, server_default=text('current_timestamp'),
@@ -112,13 +112,13 @@ mapper(models.Protein, tables['proteins'])
 
 mapper(models.Peptide, tables['peptides'])
 
-mapper(models.Genome, tables['genomes'])
+mapper(models.Genome, tables['proteomes'])
 
 mapper(models.Digest, tables['digests'])
 
 mapper(models.ProteinInstance, tables['protein_instances'], properties={
     'protein': relationship(models.Protein),
-    'genome': relationship(models.Genome)
+    'proteome': relationship(models.Genome)
 })
 
 mapper(models.PeptideInstance, tables['peptide_instances'], properties={

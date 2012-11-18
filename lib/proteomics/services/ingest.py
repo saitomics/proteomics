@@ -9,7 +9,7 @@ from pyteomics import fasta, parser
 class FastaIngestService(object):
     """ Ingest protein records from a FASTA File. """
 
-    def ingest(self, fasta_file=None, genome=None, session=db.session()):
+    def ingest(self, fasta_file=None, proteome=None, session=db.session()):
         # HANDLE GENOME HERE.
         # THROW ERROR IF DUPE?
 
@@ -35,7 +35,7 @@ class FastaIngestService(object):
             # Create protein instance.
             protein_instance = models.ProteinInstance(
                 protein=protein,
-                genome=genome,
+                proteome=proteome,
                 metadata=protein_record['metadata']
             )
             session.add(protein_instance)
