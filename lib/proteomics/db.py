@@ -7,9 +7,11 @@ modular, flexible, and fast.
 
 from proteomics import models
 from proteomics import config
-from sqlalchemy import (MetaData, Table, Column, Integer, String, ForeignKey)
+from sqlalchemy import (MetaData, Table, Column, Integer, String, ForeignKey,
+                       DateTime)
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import create_engine, MetaData
+from sqlalchemy.sql import text
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm import object_session 
 from sqlalchemy.orm.util import has_identity 
@@ -51,23 +53,35 @@ tables = {}
 tables['proteins'] = Table(
     'proteins', metadata,
     Column('id', String, primary_key=True),
-    Column('sequence', String)
+    Column('sequence', String),
+    Column('created', DateTime, server_default=text('current_timestamp')),
+    Column('modified', DateTime, server_default=text('current_timestamp'),
+           server_onupdate=text('current_timestamp')),
 )
 
 tables['peptides'] = Table(
     'peptides', metadata,
     Column('id', String, primary_key=True),
-    Column('sequence', String)
+    Column('sequence', String),
+    Column('created', DateTime, server_default=text('current_timestamp')),
+    Column('modified', DateTime, server_default=text('current_timestamp'),
+           server_onupdate=text('current_timestamp')),
 )
 
 tables['genomes'] = Table(
     'genomes', metadata,
-    Column('id', String, primary_key=True)
+    Column('id', String, primary_key=True),
+    Column('created', DateTime, server_default=text('current_timestamp')),
+    Column('modified', DateTime, server_default=text('current_timestamp'),
+           server_onupdate=text('current_timestamp')),
 )
 
 tables['digests'] = Table(
     'digests', metadata,
-    Column('id', String, primary_key=True)
+    Column('id', String, primary_key=True),
+    Column('created', DateTime, server_default=text('current_timestamp')),
+    Column('modified', DateTime, server_default=text('current_timestamp'),
+           server_onupdate=text('current_timestamp')),
 )
 
 tables['protein_instances'] = Table(
@@ -76,6 +90,9 @@ tables['protein_instances'] = Table(
     Column('protein_sequence', String, ForeignKey('proteins.sequence')),
     Column('genome_id', String, ForeignKey('genomes.id')),
     Column('metadata', String),
+    Column('created', DateTime, server_default=text('current_timestamp')),
+    Column('modified', DateTime, server_default=text('current_timestamp'),
+           server_onupdate=text('current_timestamp')),
 )
 
 tables['peptide_instances'] = Table(
@@ -84,6 +101,9 @@ tables['peptide_instances'] = Table(
     Column('protein_sequence', String, ForeignKey('proteins.sequence')),
     Column('digest_id', String, ForeignKey('digests.id')),
     Column('peptide_sequence', String, ForeignKey('peptides.sequence')),
+    Column('created', DateTime, server_default=text('current_timestamp')),
+    Column('modified', DateTime, server_default=text('current_timestamp'),
+           server_onupdate=text('current_timestamp')),
 )
 
 
