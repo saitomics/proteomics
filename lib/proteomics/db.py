@@ -8,7 +8,7 @@ modular, flexible, and fast.
 from proteomics import models
 from proteomics import config
 from sqlalchemy import (MetaData, Table, Column, Integer, String, ForeignKey,
-                       DateTime)
+                       DateTime, Float)
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.sql import text
@@ -50,79 +50,104 @@ metadata = MetaData()
 
 tables = {}
 
-tables['proteins'] = Table(
-    'proteins', metadata,
+tables['File'] = Table(
+    'files', metadata,
     Column('id', String, primary_key=True),
-    Column('sequence', String),
-    Column('created', DateTime, server_default=text('current_timestamp')),
-    Column('modified', DateTime, server_default=text('current_timestamp'),
-           server_onupdate=text('current_timestamp')),
+    Column('basename', String),
 )
+mapper(models.File, tables['File'])
 
-tables['peptides'] = Table(
-    'peptides', metadata,
-    Column('id', String, primary_key=True),
-    Column('sequence', String),
-    Column('created', DateTime, server_default=text('current_timestamp')),
-    Column('modified', DateTime, server_default=text('current_timestamp'),
-           server_onupdate=text('current_timestamp')),
+tables['FileDigest'] = Table(
+    'files_digests', metadata,
+    Column('file_id', String, ForeignKey('files.id'), primary_key=True),
+    Column('digest_id', Integer, ForeignKey('digests.id'), primary_key=True),
 )
-
-tables['proteomes'] = Table(
-    'proteomes', metadata,
-    Column('id', String, primary_key=True),
-    Column('created', DateTime, server_default=text('current_timestamp')),
-    Column('modified', DateTime, server_default=text('current_timestamp'),
-           server_onupdate=text('current_timestamp')),
-)
-
-tables['digests'] = Table(
-    'digests', metadata,
-    Column('id', String, primary_key=True),
-    Column('created', DateTime, server_default=text('current_timestamp')),
-    Column('modified', DateTime, server_default=text('current_timestamp'),
-           server_onupdate=text('current_timestamp')),
-)
-
-tables['protein_instances'] = Table(
-    'protein_instances', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('protein_sequence', String, ForeignKey('proteins.sequence')),
-    Column('proteome_id', String, ForeignKey('proteomes.id')),
-    Column('metadata', String),
-    Column('created', DateTime, server_default=text('current_timestamp')),
-    Column('modified', DateTime, server_default=text('current_timestamp'),
-           server_onupdate=text('current_timestamp')),
-)
-
-tables['peptide_instances'] = Table(
-    'digest_products', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('protein_sequence', String, ForeignKey('proteins.sequence')),
-    Column('digest_id', String, ForeignKey('digests.id')),
-    Column('peptide_sequence', String, ForeignKey('peptides.sequence')),
-    Column('created', DateTime, server_default=text('current_timestamp')),
-    Column('modified', DateTime, server_default=text('current_timestamp'),
-           server_onupdate=text('current_timestamp')),
-)
-
-
-# Map tables to domain models.
-mapper(models.Protein, tables['proteins'])
-
-mapper(models.Peptide, tables['peptides'])
-
-mapper(models.Genome, tables['proteomes'])
-
-mapper(models.Digest, tables['digests'])
-
-mapper(models.ProteinInstance, tables['protein_instances'], properties={
-    'protein': relationship(models.Protein),
-    'proteome': relationship(models.Genome)
+mapper(models.FileDigest, tables['FileDigest'], properties={
+    'file': relationship(models.File),
+    'digest': relationship(models.Digest)
 })
 
-mapper(models.PeptideInstance, tables['peptide_instances'], properties={
+tables['Taxon'] = Table(
+    'taxons', metadata,
+    Column('id', String, primary_key=True),
+)
+mapper(models.Taxon, tables['Taxon'])
+
+tables['TaxonDigest'] = Table(
+    'taxons_digests', metadata,
+    Column('taxon_id', String, ForeignKey('taxons.id'), primary_key=True),
+    Column('digest_id', Integer, ForeignKey('digests.id'), primary_key=True),
+)
+mapper(models.TaxonDigest, tables['TaxonDigest'], properties={
+    'taxon': relationship(models.Taxon),
+    'digest': relationship(models.Digest)
+})
+
+tables['Protein'] = Table(
+    'proteins', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('sequence', String, index=True),
+    Column('mass', Float),
+)
+mapper(models.Protein, tables['Protein'])
+
+tables['ProteinDigest'] = Table(
+    'proteins_digests', metadata,
+    Column('protein_id', String, ForeignKey('proteins.id'), primary_key=True),
+    Column('digest_id', Integer, ForeignKey('digests.id'), primary_key=True),
+)
+mapper(models.ProteinDigest, tables['ProteinDigest'], properties={
     'protein': relationship(models.Protein),
+    'digest': relationship(models.Digest)
+})
+
+tables['ProteinInstance'] = Table(
+    'protein_instances', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('protein_id', Integer, ForeignKey('proteins.id'), index=True),
+    Column('taxon_id', String, ForeignKey('taxons.id'), index=True),
+    Column('metadata', String),
+)
+mapper(models.ProteinInstance, tables['ProteinInstance'], properties={
+    'protein': relationship(models.Protein),
+    'taxon': relationship(models.Taxon),
+})
+
+tables['Peptide'] = Table(
+    'peptides', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('sequence', String, index=True),
+    Column('mass', Float),
+)
+mapper(models.Peptide, tables['Peptide'])
+
+tables['PeptideInstance'] = Table(
+    'peptide_instances', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('peptide_id', Integer, ForeignKey('peptides.id'), index=True),
+    Column('digest_id', Integer, ForeignKey('digests.id'), index=True),
+    Column('protein_id', Integer, ForeignKey('proteins.id'), index=True),
+    Column('metadata', String),
+)
+mapper(models.PeptideInstance, tables['PeptideInstance'], properties={
+    'peptide': relationship(models.Peptide),
     'digest': relationship(models.Digest),
-    'peptide': relationship(models.Peptide)
+    'protein': relationship(models.Protein),
+})
+
+tables['Protease'] = Table(
+    'proteases', metadata,
+    Column('id', String, primary_key=True),
+    Column('cleavage_rule', String),
+)
+mapper(models.Protease, tables['Protease'])
+
+tables['Digest'] = Table(
+    'digests', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('protease_id', String, ForeignKey('proteases.id')),
+    Column('max_missed_cleavages', Integer),
+)
+mapper(models.Digest, tables['Digest'], properties={
+    'protease': relationship(models.Protease),
 })
