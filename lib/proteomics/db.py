@@ -44,6 +44,23 @@ def get_obj_state(obj):
     elif object_session(obj) is not None and has_identity(obj):
         return 'persistent'
 
+def get_batched_results(q, batch_size):
+    """ Return an iterator that batches query results.
+    This is usually used in order to avoid overloading memory.
+    Ideally we would use window functions, but not all dbs support this.
+    """
+    total = q.count()
+    returned = 0
+    batch = None
+    while returned < total:
+        if not batch:
+            batch = q.limit(batch_size).offset(returned)
+        for row in batch:
+            returned += 1
+            if (returned % batch_size) == 0:
+                batch = None
+            yield row
+
 
 # Define tables.
 metadata = MetaData()
@@ -74,9 +91,10 @@ tables['Taxon'] = Table(
 mapper(models.Taxon, tables['Taxon'])
 
 tables['TaxonDigest'] = Table(
-    'taxons_digests', metadata,
-    Column('taxon_id', String, ForeignKey('taxons.id'), primary_key=True),
-    Column('digest_id', Integer, ForeignKey('digests.id'), primary_key=True),
+    'taxon_digests', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('taxon_id', String, ForeignKey('taxons.id')),
+    Column('digest_id', Integer, ForeignKey('digests.id')),
 )
 mapper(models.TaxonDigest, tables['TaxonDigest'], properties={
     'taxon': relationship(models.Taxon),
@@ -92,9 +110,10 @@ tables['Protein'] = Table(
 mapper(models.Protein, tables['Protein'])
 
 tables['ProteinDigest'] = Table(
-    'proteins_digests', metadata,
-    Column('protein_id', String, ForeignKey('proteins.id'), primary_key=True),
-    Column('digest_id', Integer, ForeignKey('digests.id'), primary_key=True),
+    'protein_digests', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('protein_id', Integer, ForeignKey('proteins.id'), index=True),
+    Column('digest_id', Integer, ForeignKey('digests.id'), index=True)
 )
 mapper(models.ProteinDigest, tables['ProteinDigest'], properties={
     'protein': relationship(models.Protein),
@@ -121,19 +140,39 @@ tables['Peptide'] = Table(
 )
 mapper(models.Peptide, tables['Peptide'])
 
-tables['PeptideInstance'] = Table(
-    'peptide_instances', metadata,
+tables['ProteinDigestPeptideInstance'] = Table(
+    'protein_digest_peptide_instances', metadata,
     Column('id', Integer, primary_key=True),
     Column('peptide_id', Integer, ForeignKey('peptides.id'), index=True),
-    Column('digest_id', Integer, ForeignKey('digests.id'), index=True),
-    Column('protein_id', Integer, ForeignKey('proteins.id'), index=True),
-    Column('metadata', String),
+    Column('protein_digest_id', Integer, ForeignKey('protein_digests.id'),
+           index=True),
+    Column('count', Integer),
 )
-mapper(models.PeptideInstance, tables['PeptideInstance'], properties={
-    'peptide': relationship(models.Peptide),
-    'digest': relationship(models.Digest),
-    'protein': relationship(models.Protein),
-})
+mapper(
+    models.ProteinDigestPeptideInstance, 
+    tables['ProteinDigestPeptideInstance'], 
+    properties={
+        'peptide': relationship(models.Peptide),
+        'protein_digest': relationship(models.ProteinDigest),
+    }
+)
+
+tables['TaxonDigestPeptideInstance'] = Table(
+    'taxon_digest_peptide_instances', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('peptide_id', Integer, ForeignKey('peptides.id'), index=True),
+    Column('taxon_digest_id', Integer, ForeignKey('taxon_digests.id'), 
+           index=True),
+    Column('count', Integer),
+)
+mapper(
+    models.TaxonDigestPeptideInstance, 
+    tables['TaxonDigestPeptideInstance'],
+    properties={
+        'peptide': relationship(models.Peptide),
+        'taxon_digest': relationship(models.TaxonDigest),
+    }
+)
 
 tables['Protease'] = Table(
     'proteases', metadata,
@@ -147,6 +186,8 @@ tables['Digest'] = Table(
     Column('id', Integer, primary_key=True),
     Column('protease_id', String, ForeignKey('proteases.id')),
     Column('max_missed_cleavages', Integer),
+    Column('min_acids', Integer),
+    Column('max_acids', Integer),
 )
 mapper(models.Digest, tables['Digest'], properties={
     'protease': relationship(models.Protease),

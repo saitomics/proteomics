@@ -13,7 +13,10 @@ class IngestAndDigestTestCase(unittest.TestCase):
     def setUp(self):
 
         # Setup DB.
-        self.engine = create_engine('sqlite://')
+        d = tempfile.mkdtemp(prefix="tdb.")
+        db_file = os.path.join(d, "foo")
+        self.engine = create_engine('sqlite:///%s' % db_file)
+        #self.engine = create_engine('sqlite://')
         def get_connection():
             return self.engine.connect()
         self.get_connection = get_connection
@@ -37,10 +40,15 @@ class IngestAndDigestTestCase(unittest.TestCase):
         logger.setLevel(logging.INFO)
         task = DigestAndIngestTask(
             logger=logger,
-            fasta_paths=[self.fasta_file],
+            #fasta_paths=[self.fasta_file],
+            fasta_paths=[
+                '/home/adorsk/projects/saitomics/data/syn5701.fasta',
+                '/home/adorsk/projects/saitomics/data/syn7803.fasta'
+            ],
             digest_def={
                 'protease_id': 'trypsin', 
-                'max_missed_cleavages': 2
+                'max_missed_cleavages': 0,
+                'min_acids': 6,
             },
             get_connection=self.get_connection
         )

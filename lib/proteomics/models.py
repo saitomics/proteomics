@@ -57,16 +57,27 @@ class Peptide(object):
         self.mass = mass
         self.metadata = metadata
 
-class PeptideInstance(object):
+class ProteinDigestPeptideInstance(object):
     """
-    A peptide instance is a peptide
-    produced by a digest of a protein.
+    A protein digest peptide instance is a count of how many times a peptide 
+    sequence appears in the the digestion of a protein.
     """
-    def __init__(self, id=None, peptide=None, protein=None, digest=None): 
+    def __init__(self, id=None, peptide=None, protein_digest=None, count=None): 
         self.id = id
         self.peptide = peptide
-        self.protein = protein
-        self.digest = digest
+        self.protein_digest = protein_digest
+        self.count = count
+
+class TaxonDigestPeptideInstance(object):
+    """
+    A taxon digest peptide instance is a count of how many times a peptide
+    sequence appears in the the digestion of a taxon.
+    """
+    def __init__(self, id=None, peptide=None, taxon_digest=None, count=None): 
+        self.id = id
+        self.peptide = peptide
+        self.taxon_digest = taxon_digest
+        self.count = count
 
 class Protease(object):
     def __init__(self, id=None, cleavage_rule=None):
@@ -74,7 +85,10 @@ class Protease(object):
         self.cleavage_rule = cleavage_rule
 
 class Digest(object):
-    def __init__(self, id=None, protease=None, max_missed_cleavages=0):
+    def __init__(self, id=None, protease=None, max_missed_cleavages=0,
+                 min_acids=0, max_acids=None):
         self.id = id
         self.protease = protease 
         self.max_missed_cleavages = max_missed_cleavages
+        self.min_acids = min_acids
+        self.max_acids = max_acids
