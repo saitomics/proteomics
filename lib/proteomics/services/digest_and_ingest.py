@@ -16,10 +16,10 @@ from collections import defaultdict
 
 class DigestAndIngestTask(object):
     def __init__(self, logger=logging.getLogger(), fasta_paths=[], 
-                 digest_def=None, get_connection=None, **kwargs):
+                 digest=None, get_connection=None, **kwargs):
         self.logger = logger
         self.fasta_paths = fasta_paths
-        self.digest_def = digest_def
+        self.digest = digest
 
         # Assign get_connection function.
         if not get_connection:
@@ -29,43 +29,18 @@ class DigestAndIngestTask(object):
         self.get_connection = get_connection
 
     def run(self):
+        # Get session.
+        self.session = db.get_session(bind=self.get_connection())
+        self.digest = self.session.merge(self.digest)
+
         # Initialize stats dict.
         self.stats = defaultdict(int)
-
-        # get db session.
-        self.connection = self.get_connection()
-        self.session = sessionmaker()(bind=self.connection)
-
-        # Get protease.
-        protease = self.session.query(Protease).get(
-            self.digest_def.get('protease_id'))
-
-        # Get or create digest object.
-        self.digest = (
-            self.session.query(Digest)
-            .filter(Digest.protease == protease)
-            .filter(Digest.max_missed_cleavages == self.digest_def.get(
-                'max_missed_cleavages'))
-            .filter(Digest.max_missed_cleavages == self.digest_def.get(
-                'min_acids'))
-            .filter(Digest.max_missed_cleavages == self.digest_def.get(
-                'max_acids'))
-        ).first()
-        if not self.digest:
-            digest_kwargs = {}
-            digest_kwargs.update(self.digest_def)
-            del digest_kwargs['protease_id']
-            digest_kwargs['protease'] = protease
-            self.digest = Digest(**digest_kwargs)
-            self.session.add(self.digest)
-            self.session.commit()
 
         # Process FASTA files.
         for path in self.fasta_paths:
             self.process_fasta_file(path)
 
-        self.logger.info("Digest and Ingest complete.")
-        self.logger.info("Ingest stats: %s" % self.stats)
+        self.logger.info("Digest and ingest task complete.")
         return self.stats
 
     def process_fasta_file(self, path):

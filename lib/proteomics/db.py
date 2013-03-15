@@ -16,11 +16,16 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm import object_session 
 from sqlalchemy.orm.util import has_identity 
 
-engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
-session = scoped_session(sessionmaker(bind=engine))
 
-def get_session():
-    return session()
+engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
+
+def get_connection():
+    return engine.connect()
+
+def get_session(bind=None):
+    if not bind:
+        bind = get_connection()
+    return sessionmaker(bind=bind)()
 
 def init_db(bind=engine):
     metadata.create_all(bind=bind, checkfirst=True)
