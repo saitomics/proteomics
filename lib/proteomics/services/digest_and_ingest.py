@@ -1,7 +1,6 @@
 from proteomics.models import (File, FileDigest, Taxon, Protein, 
-                               ProteinInstance, ProteinDigest, Peptide, 
-                               ProteinDigestPeptideInstance, 
-                               TaxonDigestPeptideInstance, 
+                               TaxonProtein, ProteinDigest, Peptide, 
+                               ProteinDigestPeptide, TaxonDigestPeptide, 
                                TaxonDigest, Digest, Protease)
 from proteomics import db
 from proteomics.util.digest import cleave
@@ -145,17 +144,17 @@ class DigestAndIngestTask(object):
         self.process_protein_batch(
             batch, taxon, logger=protein_logger)
 
-        # Generate TaxonDigestPeptideInstances.
+        # Generate TaxonDigestPeptides
         q = (
             self.session.query(
                 Peptide.id, 
-                func.sum(ProteinDigestPeptideInstance.count)
+                func.sum(ProteinDigestPeptide.count)
             )
             .select_from(Peptide)
-            .join(ProteinDigestPeptideInstance)
+            .join(ProteinDigestPeptide)
             .join(ProteinDigest)
             .join(Protein)
-            .join(ProteinInstance)
+            .join(TaxonProtein)
             .join(Digest)
             .join(TaxonDigest)
             .join(Taxon)
@@ -164,18 +163,18 @@ class DigestAndIngestTask(object):
             .group_by(Peptide)
             )
         batch_size = 1e4
-        tdpi_batch = []
-        tdpi_counter = 0
+        tdp_batch = []
+        tdp_counter = 0
         for row in db.get_batched_results(q, batch_size):
-            tdpi_counter += 1
-            tdpi_batch.append(row)
-            if (tdpi_counter % batch_size) == 0:
-                self.process_taxon_peptide_instance_batch(
-                    taxon_digest, tdpi_batch, logger=file_logger)
-                tdpi_batch = []
-        self.process_taxon_peptide_instance_batch(
-            taxon_digest, tdpi_batch, logger=file_logger)
-        self.stats['TaxonDigestPeptideInstance'] += tdpi_counter
+            tdp_counter += 1
+            tdp_batch.append(row)
+            if (tdp_counter % batch_size) == 0:
+                self.process_taxon_digest_peptide_batch(
+                    taxon_digest, tdp_batch, logger=file_logger)
+                tdp_batch = []
+        self.process_taxon_digest_peptide_batch(
+            taxon_digest, tdp_batch, logger=file_logger)
+        self.stats['TaxonDigestPeptide'] += tdp_counter
 
         self.logger.info("Done processing file '%s'" % path)
 
@@ -263,21 +262,21 @@ class DigestAndIngestTask(object):
                     peptide_counter = 0
             self.process_peptide_batch(undigested_batch, logger)
 
-        # Create protein instances in bulk.
-        protein_instance_dicts = []
+        # Create taxon protein instances in bulk.
+        taxon_protein_dicts = []
         for metadata, sequence in batch:
             protein = existing_proteins[sequence]
-            protein_instance_dicts.append({
+            taxon_protein_dicts.append({
                 'protein_id': protein.id,
                 'taxon_id': taxon.id,
                 'metadata': metadata,
             })
-        logger.info("Creating %s new protein instances..." % (
-            len(protein_instance_dicts)))
+        logger.info("Creating %s new taxon proteins..." % (
+            len(taxon_protein_dicts)))
         self.session.execute(
-            db.tables['ProteinInstance'].insert(), protein_instance_dicts)
+            db.tables['TaxonProtein'].insert(), taxon_protein_dicts)
         self.session.commit()
-        self.stats['ProteinInstance'] += len(protein_instance_dicts)
+        self.stats['TaxonProtein'] += len(taxon_protein_dicts)
 
     def process_peptide_batch(self, batch, logger=None):
         if not logger:
@@ -350,28 +349,28 @@ class DigestAndIngestTask(object):
             num_peptide_instances += len(peptides_histogram)
 
         # Create protein digest peptide instances in bulk.
-        logger.info("Creating %s new protein digest peptide instances..." % (
+        logger.info("Creating %s new protein digest peptides..." % (
             num_peptide_instances))
-        pdpi_batch = []
-        pdpi_counter = 0
+        pdp_batch = []
+        pdp_counter = 0
         for protein, data in batch.items():
             for sequence, count in data['peptide_histogram'].items():
-                pdpi_counter += 1
+                pdp_counter += 1
                 peptide = existing_peptides[sequence]
-                pdpi_batch.append({
+                pdp_batch.append({
                     'peptide_id': peptide.id,
                     'protein_digest_id': data['protein_digest'].id,
                     'count': count,
                 })
-                if (pdpi_counter % 1e4) == 0:
+                if (pdp_counter % 1e4) == 0:
                     self.session.execute(
-                        db.tables['ProteinDigestPeptideInstance'].insert(),
-                        pdpi_batch)
+                        db.tables['ProteinDigestPeptide'].insert(),
+                        pdp_batch)
                     self.session.commit()
         self.session.execute(
-            db.tables['ProteinDigestPeptideInstance'].insert(), pdpi_batch)
+            db.tables['ProteinDigestPeptide'].insert(), pdp_batch)
         self.session.commit()
-        self.stats['ProteinDigestPeptideInstance'] += num_peptide_instances
+        self.stats['ProteinDigestPeptide'] += num_peptide_instances
 
     def update_existing_peptides_(self, sequences, existing_peptides):
         if not sequences:
@@ -381,12 +380,12 @@ class DigestAndIngestTask(object):
         ):
             existing_peptides[peptide.sequence] = peptide
 
-    def process_taxon_peptide_instance_batch(self, taxon_digest, batch, 
+    def process_taxon_digest_peptide_batch(self, taxon_digest, batch, 
                                              logger=None):
         if not logger:
             logger = self.logger
         dicts = []
-        logger.info("Creating %s new taxon digest peptide instances..." % (
+        logger.info("Creating %s new taxon digest peptides..." % (
             len(batch)))
         for row in batch:
             dicts.append({
@@ -394,7 +393,7 @@ class DigestAndIngestTask(object):
                 'peptide_id': row[0],
                 'count': row[1],
             })
-        self.session.execute(db.tables['TaxonDigestPeptideInstance'].insert(), 
+        self.session.execute(db.tables['TaxonDigestPeptide'].insert(), 
                              dicts)
         self.session.commit()
 

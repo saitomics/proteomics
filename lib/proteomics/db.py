@@ -68,16 +68,16 @@ metadata = MetaData()
 tables = {}
 
 tables['File'] = Table(
-    'files', metadata,
+    'file', metadata,
     Column('id', String, primary_key=True),
     Column('basename', String),
 )
 mapper(models.File, tables['File'])
 
 tables['FileDigest'] = Table(
-    'files_digests', metadata,
-    Column('file_id', String, ForeignKey('files.id'), primary_key=True),
-    Column('digest_id', Integer, ForeignKey('digests.id'), primary_key=True),
+    'file_digest', metadata,
+    Column('file_id', String, ForeignKey('file.id'), primary_key=True),
+    Column('digest_id', Integer, ForeignKey('digest.id'), primary_key=True),
 )
 mapper(models.FileDigest, tables['FileDigest'], properties={
     'file': relationship(models.File),
@@ -85,16 +85,16 @@ mapper(models.FileDigest, tables['FileDigest'], properties={
 })
 
 tables['Taxon'] = Table(
-    'taxons', metadata,
+    'taxon', metadata,
     Column('id', String, primary_key=True),
 )
 mapper(models.Taxon, tables['Taxon'])
 
 tables['TaxonDigest'] = Table(
-    'taxon_digests', metadata,
+    'taxon_digest', metadata,
     Column('id', Integer, primary_key=True),
-    Column('taxon_id', String, ForeignKey('taxons.id')),
-    Column('digest_id', Integer, ForeignKey('digests.id')),
+    Column('taxon_id', String, ForeignKey('taxon.id')),
+    Column('digest_id', Integer, ForeignKey('digest.id')),
 )
 mapper(models.TaxonDigest, tables['TaxonDigest'], properties={
     'taxon': relationship(models.Taxon),
@@ -102,7 +102,7 @@ mapper(models.TaxonDigest, tables['TaxonDigest'], properties={
 })
 
 tables['Protein'] = Table(
-    'proteins', metadata,
+    'protein', metadata,
     Column('id', Integer, primary_key=True),
     Column('sequence', String, index=True),
     Column('mass', Float),
@@ -110,64 +110,64 @@ tables['Protein'] = Table(
 mapper(models.Protein, tables['Protein'])
 
 tables['ProteinDigest'] = Table(
-    'protein_digests', metadata,
+    'protein_digest', metadata,
     Column('id', Integer, primary_key=True),
-    Column('protein_id', Integer, ForeignKey('proteins.id'), index=True),
-    Column('digest_id', Integer, ForeignKey('digests.id'), index=True)
+    Column('protein_id', Integer, ForeignKey('protein.id'), index=True),
+    Column('digest_id', Integer, ForeignKey('digest.id'), index=True)
 )
 mapper(models.ProteinDigest, tables['ProteinDigest'], properties={
     'protein': relationship(models.Protein),
     'digest': relationship(models.Digest)
 })
 
-tables['ProteinInstance'] = Table(
-    'protein_instances', metadata,
+tables['TaxonProtein'] = Table(
+    'taxon_protein', metadata,
     Column('id', Integer, primary_key=True),
-    Column('protein_id', Integer, ForeignKey('proteins.id'), index=True),
-    Column('taxon_id', String, ForeignKey('taxons.id'), index=True),
+    Column('taxon_id', String, ForeignKey('taxon.id'), index=True),
+    Column('protein_id', Integer, ForeignKey('protein.id'), index=True),
     Column('metadata', String),
 )
-mapper(models.ProteinInstance, tables['ProteinInstance'], properties={
+mapper(models.TaxonProtein, tables['TaxonProtein'], properties={
     'protein': relationship(models.Protein),
     'taxon': relationship(models.Taxon),
 })
 
 tables['Peptide'] = Table(
-    'peptides', metadata,
+    'peptide', metadata,
     Column('id', Integer, primary_key=True),
     Column('sequence', String, index=True),
     Column('mass', Float),
 )
 mapper(models.Peptide, tables['Peptide'])
 
-tables['ProteinDigestPeptideInstance'] = Table(
-    'protein_digest_peptide_instances', metadata,
+tables['ProteinDigestPeptide'] = Table(
+    'protein_digest_peptide', metadata,
     Column('id', Integer, primary_key=True),
-    Column('peptide_id', Integer, ForeignKey('peptides.id'), index=True),
-    Column('protein_digest_id', Integer, ForeignKey('protein_digests.id'),
+    Column('peptide_id', Integer, ForeignKey('peptide.id'), index=True),
+    Column('protein_digest_id', Integer, ForeignKey('protein_digest.id'),
            index=True),
     Column('count', Integer),
 )
 mapper(
-    models.ProteinDigestPeptideInstance, 
-    tables['ProteinDigestPeptideInstance'], 
+    models.ProteinDigestPeptide, 
+    tables['ProteinDigestPeptide'], 
     properties={
         'peptide': relationship(models.Peptide),
         'protein_digest': relationship(models.ProteinDigest),
     }
 )
 
-tables['TaxonDigestPeptideInstance'] = Table(
-    'taxon_digest_peptide_instances', metadata,
+tables['TaxonDigestPeptide'] = Table(
+    'taxon_digest_peptide', metadata,
     Column('id', Integer, primary_key=True),
-    Column('peptide_id', Integer, ForeignKey('peptides.id'), index=True),
-    Column('taxon_digest_id', Integer, ForeignKey('taxon_digests.id'), 
+    Column('peptide_id', Integer, ForeignKey('peptide.id'), index=True),
+    Column('taxon_digest_id', Integer, ForeignKey('taxon_digest.id'), 
            index=True),
     Column('count', Integer),
 )
 mapper(
-    models.TaxonDigestPeptideInstance, 
-    tables['TaxonDigestPeptideInstance'],
+    models.TaxonDigestPeptide, 
+    tables['TaxonDigestPeptide'],
     properties={
         'peptide': relationship(models.Peptide),
         'taxon_digest': relationship(models.TaxonDigest),
@@ -175,16 +175,16 @@ mapper(
 )
 
 tables['Protease'] = Table(
-    'proteases', metadata,
+    'protease', metadata,
     Column('id', String, primary_key=True),
     Column('cleavage_rule', String),
 )
 mapper(models.Protease, tables['Protease'])
 
 tables['Digest'] = Table(
-    'digests', metadata,
+    'digest', metadata,
     Column('id', Integer, primary_key=True),
-    Column('protease_id', String, ForeignKey('proteases.id')),
+    Column('protease_id', String, ForeignKey('protease.id')),
     Column('max_missed_cleavages', Integer),
     Column('min_acids', Integer),
     Column('max_acids', Integer),

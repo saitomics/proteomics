@@ -36,9 +36,9 @@ class ProteinDigest(object):
         self.protein = protein
         self.digest = digest
 
-class ProteinInstance(object):
+class TaxonProtein(object):
     """
-    A protein instance is a single occurence of a protein
+    A taxon protein is a single occurence of a protein
     that occurs within a taxon's proteome.
     We use protein records because the same protein can appear multiple
     times w/in a proteome.
@@ -57,9 +57,9 @@ class Peptide(object):
         self.mass = mass
         self.metadata = metadata
 
-class ProteinDigestPeptideInstance(object):
+class ProteinDigestPeptide(object):
     """
-    A protein digest peptide instance is a count of how many times a peptide 
+    A protein digest peptide is a count of how many times a peptide 
     sequence appears in the the digestion of a protein.
     """
     def __init__(self, id=None, peptide=None, protein_digest=None, count=None): 
@@ -68,9 +68,9 @@ class ProteinDigestPeptideInstance(object):
         self.protein_digest = protein_digest
         self.count = count
 
-class TaxonDigestPeptideInstance(object):
+class TaxonDigestPeptide(object):
     """
-    A taxon digest peptide instance is a count of how many times a peptide
+    A taxon digest peptide is a count of how many times a peptide
     sequence appears in the the digestion of a taxon.
     """
     def __init__(self, id=None, peptide=None, taxon_digest=None, count=None): 
