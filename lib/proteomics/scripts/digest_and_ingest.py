@@ -19,9 +19,9 @@ Assumptions:
 Imports and setup.
 """
 from proteomics import db
+from proteomics import config
 from proteomics.models import (Protease, Digest)
 from proteomics.services.digest_and_ingest import DigestAndIngestTask
-from pyteomics.parser import expasy_rules
 import argparse
 import logging
 import json
@@ -57,14 +57,7 @@ def main():
                 args.digest_def))
     # Otherwise use default digest.
     else:
-        digest_def = {
-            'protease': {
-                'id': 'trypsin',
-                'cleavage_rule': expasy_rules['trypsin'],
-            },
-            'max_missed_cleavages': 0,
-            'min_acids': 6,
-        }
+        digest_def = config.DEFAULT_DIGEST_DEFINITION
 
     # Get or create the digest.
     digest = get_digest(logger, digest_def)
