@@ -28,7 +28,10 @@ def generate_redundancy_table(session=None, taxon_digests=[], logger=None):
     redundancies = {}
     combinations = itertools.combinations(taxon_digests, 2)
     for combo in combinations:
-        logger.info("Counting peptides in common for %s" % (str(combo)))
+        logger.info("Counting peptides in common for %s" % (str([
+            "(taxon: %s, digest: %s)" % (
+                taxon_digest.taxon.id, taxon_digest.digest.id
+            ) for taxon_digest in combo])))
         redundancies[combo] = count_common_peptides(session, combo)
 
     # Format redundancy table, sorting by taxon ids.
