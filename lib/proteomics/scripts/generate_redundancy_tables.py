@@ -78,7 +78,7 @@ def main():
     # Generate the redundancy tables.
     tables = {}
     tables['redundancy_count'] = redundancy.generate_redundancy_table(
-        session, taxon_digests)
+        session, taxon_digests, logger=logger)
 
     # Create output dir if it does not exist.
     if not os.path.exists(args.output_dir):
@@ -87,10 +87,14 @@ def main():
     # Output tables.
     for table_id, table in tables.items():
         table_file = os.path.join(args.output_dir, table_id + '.csv')
+        logger.info("Writing '%s'..." % table_file)
         with open(table_file, 'wb') as f:
             w = csv.writer(f)
             for row in table:
                 w.writerow(row)
+
+    logger.info("Done.")
+
 
 """ Helper methods. """
 def get_digest(logger, digest_def, session=None):

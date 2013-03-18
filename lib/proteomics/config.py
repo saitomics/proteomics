@@ -1,5 +1,3 @@
-SQLALCHEMY_DATABASE_URI = 'sqlite:////data/proteomics/proteomics.db.sqlite'
-
 TRYPSIN_CLEAVAGE_RULE = '([KR](?=[^P]))|((?<=W)K(?=P))|((?<=M)R(?=P))'
 
 DEFAULT_DIGEST_DEFINITION = {

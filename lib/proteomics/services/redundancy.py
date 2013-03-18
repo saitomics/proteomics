@@ -1,6 +1,7 @@
 from proteomics.models import (TaxonDigestPeptide, TaxonDigest, Peptide)
 from sqlalchemy.sql import func
 import itertools
+import logging
 
 
 def count_common_peptides(session=None, taxon_digests=[]):
@@ -19,11 +20,15 @@ def count_common_peptides(session=None, taxon_digests=[]):
     )
     return q.count()
 
-def generate_redundancy_table(session=None, taxon_digests=[]):
+def generate_redundancy_table(session=None, taxon_digests=[], logger=None):
+    if not logger:
+        logger = logging.getLogger()
+
     # Initialize redundancy table.
     redundancies = {}
     combinations = itertools.combinations(taxon_digests, 2)
     for combo in combinations:
+        logging.info("Counting peptides in common for %s" % combo)
         redundancies[combo] = count_common_peptides(session, combo)
 
     # Format redundancy table, sorting by taxon ids.
