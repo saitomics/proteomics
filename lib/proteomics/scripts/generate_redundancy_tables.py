@@ -81,7 +81,7 @@ def main():
 
     # Create output dir if it does not exist.
     if not os.path.exists(args.output_dir):
-        os.path.makedirs(args.output_dir)
+        os.makedirs(args.output_dir)
 
     # Output tables.
     for table_id, table in tables.items():
