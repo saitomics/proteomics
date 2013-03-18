@@ -5,8 +5,6 @@ import logging
 
 
 def count_common_peptides(session=None, taxon_digests=[]):
-    if not taxon_digests:
-        return
     taxon_digest_ids = [taxon_digest.id for taxon_digest in taxon_digests]
     taxon_digest_count = func.count(TaxonDigest.id)
     q = (
@@ -20,40 +18,78 @@ def count_common_peptides(session=None, taxon_digests=[]):
     )
     return q.count()
 
-def generate_redundancy_table(session=None, taxon_digests=[], logger=None):
+def sum_peptide_counts(session=None, taxon_digests=[]):
+    taxon_digest_ids = [taxon_digest.id for taxon_digest in taxon_digests]
+    taxon_digest_peptide_count = func.count(TaxonDigestPeptide.id)
+    q = (
+        session.query(taxon_digest_peptide_count)
+        .select_from(TaxonDigestPeptide)
+        .join(TaxonDigest)
+        .filter(TaxonDigest.id.in_(taxon_digest_ids))
+        .group_by(TaxonDigest.id)
+    )
+    return sum([row[0] for row in q])
+
+def generate_redundancy_tables(session=None, taxon_digests=[], logger=None):
+    """ 
+    Generates tables of:
+        - counts: counts of peptides in common between pairs of taxon digests
+        - percents: counts/(sum of peptides for the pair)
+    """
+
     if not logger:
         logger = logging.getLogger()
 
-    # Initialize redundancy table.
-    redundancies = {}
+    # Generate pairs.
     combinations = itertools.combinations(taxon_digests, 2)
+
+    # Get redundancies and sums by querying db.
+    # Calculate percents.
+    values = {
+        'counts': {},
+        'percents': {},
+    }
+    redundancies = {}
+    percents = {}
     for combo in combinations:
         logger.info("Counting peptides in common for %s" % (str([
             "(taxon: %s, digest: %s)" % (
                 taxon_digest.taxon.id, taxon_digest.digest.id
             ) for taxon_digest in combo])))
-        redundancies[combo] = count_common_peptides(session, combo)
+        num_in_common = count_common_peptides(session, combo)
+        combined_sum = sum_peptide_counts(session, combo)
+        if combined_sum:
+            percent_in_common = float(num_in_common)/combined_sum
+        else:
+            percent_in_common = 0
+        values['counts'][combo] = num_in_common
+        values['percents'][combo] = percent_in_common
 
-    # Format redundancy table, sorting by taxon ids.
+    # Assemble tables, sorting by taxon ids.
     # We only put values in the upper-right portion.
-    redundancy_table = []
+    tables = {
+        'counts': [],
+        'percents': []
+    }
     sorted_taxon_digests = sorted(taxon_digests, key=lambda td: td.taxon.id)
-    # Top row.
-    redundancy_table.append([None] + [td.taxon.id for td in
-                                      sorted_taxon_digests])
-    # Data rows.
-    for i, td1 in enumerate(sorted_taxon_digests):
-        data_row = [td1.taxon.id]
-        for j, td2 in enumerate(sorted_taxon_digests):
-            if j < i:
-                data_row.append(None)
-            elif j == i:
-                data_row.append('X')
-            else:
-                value = redundancies.get((td1,td2,))
-                # Key might be in another order.
-                if not value:
-                    value = redundancies.get((td2,td1,))
-                data_row.append(value)
-        redundancy_table.append(data_row)
-    return redundancy_table
+
+    for table_id, table in tables.items():
+        # Top row.
+        table.append([None] + [td.taxon.id for td in sorted_taxon_digests])
+        # Data rows.
+        for i, td1 in enumerate(sorted_taxon_digests):
+            data_row = [td1.taxon.id]
+            for j, td2 in enumerate(sorted_taxon_digests):
+                if j < i:
+                    data_row.append(None)
+                elif j == i:
+                    data_row.append('X')
+                else:
+                    value = values[table_id].get((td1,td2,))
+                    # Key might be in another order.
+                    if not value:
+                        value = values[table_id].get((td2,td1,))
+                    data_row.append(value)
+            table.append(data_row)
+
+    return tables

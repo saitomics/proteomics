@@ -16,17 +16,12 @@ class Taxon(object):
     def __init__(self, id=None, metadata=None):
         self.id = id
         self.metadata = metadata
-    def __repr__(self):
-        return "%s(%r)" % (self.__class__, self.id)
 
 class TaxonDigest(object):
     def __init__(self, id=None, taxon=None, digest=None):
         self.id = id
         self.taxon = taxon
         self.digest = digest
-    def __repr__(self):
-        return "%s(%r)" % (
-            self.__class__, {'taxon': self.taxon, 'digest': self.digest})
 
 class Protein(object):
     def __init__(self, id=None, sequence=None, mass=None, metadata=None):
@@ -88,8 +83,6 @@ class Protease(object):
     def __init__(self, id=None, cleavage_rule=None):
         self.id = id
         self.cleavage_rule = cleavage_rule
-    def __repr__(self):
-        return "%s(%r)" % (self.__class__, self.id)
 
 class Digest(object):
     def __init__(self, id=None, protease=None, max_missed_cleavages=0,
@@ -99,10 +92,3 @@ class Digest(object):
         self.max_missed_cleavages = max_missed_cleavages
         self.min_acids = min_acids
         self.max_acids = max_acids
-    def __repr__(self):
-        return "%s(%r)" % (self.__class__, {
-            'protease': self.protease,
-            'max_missed_cleavages': self.max_missed_cleavages,
-            'min_acids': self.min_acids,
-            'max_acids': self.max_acids
-        })

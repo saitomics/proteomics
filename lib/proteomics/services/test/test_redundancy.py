@@ -77,13 +77,12 @@ class RedundancyTestCase(unittest.TestCase):
         expected = {(1, 2): 6, (1, 3): 4, (2, 3): 2, (1, 2, 3): 2}
         self.assertEquals(expected, actual)
 
-    def test_generate_redundancy_table(self):
+    def test_generate_redundancy_tables(self):
         taxon_digests = self.session.query(TaxonDigest).all()
-        actual = redundancy.generate_redundancy_table(
+        actual = redundancy.generate_redundancy_tables(
             session=self.session,
             taxon_digests=taxon_digests
         )
-        print actual
 
     def tearDown(self):
         pass

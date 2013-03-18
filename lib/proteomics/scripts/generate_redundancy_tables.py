@@ -76,8 +76,7 @@ def main():
     ).all()
 
     # Generate the redundancy tables.
-    tables = {}
-    tables['redundancy_count'] = redundancy.generate_redundancy_table(
+    tables = redundancy.generate_redundancy_tables(
         session, taxon_digests, logger=logger)
 
     # Create output dir if it does not exist.
