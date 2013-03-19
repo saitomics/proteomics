@@ -18,17 +18,14 @@ def count_common_peptides(session=None, taxon_digests=[]):
     )
     return q.count()
 
-def sum_peptide_counts(session=None, taxon_digests=[]):
+def count_peptide_union(session=None, taxon_digests=[]):
     taxon_digest_ids = [taxon_digest.id for taxon_digest in taxon_digests]
-    taxon_digest_peptide_count = func.count(TaxonDigestPeptide.id)
     q = (
-        session.query(taxon_digest_peptide_count)
-        .select_from(TaxonDigestPeptide)
+        session.query(TaxonDigestPeptide)
         .join(TaxonDigest)
         .filter(TaxonDigest.id.in_(taxon_digest_ids))
-        .group_by(TaxonDigest.id)
     )
-    return sum([row[0] for row in q])
+    return q.count()
 
 def generate_redundancy_tables(session=None, taxon_digests=[], logger=None):
     """ 
@@ -57,9 +54,9 @@ def generate_redundancy_tables(session=None, taxon_digests=[], logger=None):
                 taxon_digest.taxon.id, taxon_digest.digest.id
             ) for taxon_digest in combo])))
         num_in_common = count_common_peptides(session, combo)
-        combined_sum = sum_peptide_counts(session, combo)
-        if combined_sum:
-            percent_in_common = float(num_in_common)/combined_sum
+        num_in_union = count_peptide_union(session, combo)
+        if num_in_union:
+            percent_in_common = 100.0 * num_in_common/num_in_union
         else:
             percent_in_common = 0
         values['counts'][combo] = num_in_common

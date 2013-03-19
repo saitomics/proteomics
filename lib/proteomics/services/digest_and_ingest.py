@@ -88,6 +88,7 @@ class DigestAndIngestTask(object):
             taxon_digest = TaxonDigest(taxon=taxon, digest=self.digest)
             self.session.add(taxon_digest)
             self.session.commit()
+            self.stats['TaxonDigest'] += 1
 
         # Process protein sequences in batches.
         file_logger.info("Counting # of protein sequences...")
@@ -128,15 +129,14 @@ class DigestAndIngestTask(object):
             .select_from(Peptide)
             .join(ProteinDigestPeptide)
             .join(ProteinDigest)
+            .join(Digest)
             .join(Protein)
             .join(TaxonProtein)
-            .join(Digest)
-            .join(TaxonDigest)
             .join(Taxon)
             .filter(Taxon.id == taxon.id)
             .filter(Digest.id == self.digest.id)
-            .group_by(Peptide)
-            )
+            .group_by(Peptide.id)
+        )
         batch_size = 1e4
         tdp_batch = []
         tdp_counter = 0
