@@ -5,6 +5,7 @@ from proteomics.models import (File, FileDigest, Taxon, Protein,
 from proteomics import db
 from proteomics.util.digest import cleave
 from proteomics.util.logging_util import LoggerLogHandler
+from proteomics.util.mass import get_aa_sequence_mass
 from pyteomics import fasta
 import os
 import hashlib
@@ -200,7 +201,8 @@ class DigestAndIngestTask(object):
         for metadata, sequence in batch:
             if sequence not in existing_proteins:
                 num_new_proteins += 1
-                protein = Protein(sequence=sequence)
+                mass = get_aa_sequence_mass(sequence)
+                protein = Protein(sequence=sequence, mass=mass)
                 self.session.add(protein)
                 existing_proteins[sequence] = protein
                 undigested_proteins[sequence] = protein
@@ -292,8 +294,10 @@ class DigestAndIngestTask(object):
         for sequence in combined_peptide_sequences:
             if sequence not in existing_peptides:
                 num_new_peptides += 1
+                mass = get_aa_sequence_mass(sequence)
                 peptide_dicts.append({
-                    'sequence': sequence
+                    'sequence': sequence,
+                    'mass': mass,
                 })
         logger.info("Creating %s new peptides..." % num_new_peptides)
         self.session.execute(db.tables['Peptide'].insert(), peptide_dicts)
