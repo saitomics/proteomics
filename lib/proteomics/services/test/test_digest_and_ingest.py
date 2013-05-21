@@ -1,6 +1,6 @@
 import unittest
 from proteomics import db
-from proteomics.models import Protease
+from proteomics.models import Protease, Digest
 from proteomics.services.digest_and_ingest import DigestAndIngestTask
 from pyteomics.parser import expasy_rules
 from sqlalchemy import create_engine
@@ -22,12 +22,17 @@ class IngestAndDigestTestCase(unittest.TestCase):
         self.get_connection = get_connection
         db.metadata.create_all(bind=self.engine)
 
+        session = db.get_session(bind=self.get_connection())
+
         # Create trypsin protease.
-        trypsin = {
-            'id': 'trypsin', 
-            'cleavage_rule': expasy_rules['trypsin']
-        }
-        self.engine.execute(db.tables['Protease'].insert(), [trypsin])
+        trypsin = Protease(id='trypsin', cleavage_rule=expasy_rules['trypsin'])
+        session.add(trypsin)
+
+        # Create digest.
+        self.digest = Digest(protease=trypsin)
+        session.add(self.digest)
+        session.commit()
+
 
         # Create mock FASTA file.
         hndl, self.fasta_file = tempfile.mkstemp(prefix="tst.fasta.")
@@ -38,18 +43,15 @@ class IngestAndDigestTestCase(unittest.TestCase):
         logger = logging.getLogger('testLogger')
         logger.addHandler(logging.StreamHandler())
         logger.setLevel(logging.INFO)
+
         task = DigestAndIngestTask(
             logger=logger,
-            #fasta_paths=[self.fasta_file],
-            fasta_paths=[
-                '/home/adorsk/projects/saitomics/data/syn5701.fasta',
-                '/home/adorsk/projects/saitomics/data/syn7803.fasta'
-            ],
-            digest_def={
-                'protease_id': 'trypsin', 
-                'max_missed_cleavages': 0,
-                'min_acids': 6,
-            },
+            fasta_paths=[self.fasta_file],
+            #fasta_paths=[
+                #'/home/adorsk/projects/saitomics/data/syn5701.fasta',
+                #'/home/adorsk/projects/saitomics/data/syn7803.fasta'
+            #],
+            digest=self.digest,
             get_connection=self.get_connection
         )
         stats = task.run()

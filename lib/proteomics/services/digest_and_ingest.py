@@ -200,12 +200,16 @@ class DigestAndIngestTask(object):
         num_new_proteins = 0
         for metadata, sequence in batch:
             if sequence not in existing_proteins:
-                num_new_proteins += 1
-                mass = get_aa_sequence_mass(sequence)
-                protein = Protein(sequence=sequence, mass=mass)
+                try:
+                    mass = get_aa_sequence_mass(sequence)
+                    protein = Protein(sequence=sequence, mass=mass)
+                except Exception as e:
+                    logger.exception("Error processing protein, skipping")
+                    continue
                 self.session.add(protein)
-                existing_proteins[sequence] = protein
+                num_new_proteins += 1
                 undigested_proteins[sequence] = protein
+                existing_proteins[sequence] = protein
         logger.info("creating %s new proteins..." % (
             num_new_proteins))
         self.session.commit()
@@ -242,7 +246,12 @@ class DigestAndIngestTask(object):
         # Create taxon protein instances in bulk.
         taxon_protein_dicts = []
         for metadata, sequence in batch:
-            protein = existing_proteins[sequence]
+            try:
+                protein = existing_proteins[sequence]
+            except Exception as e:
+                logger.exception("Error processing protein, sequence does not"
+                                 " exist in db, skipping")
+                continue
             taxon_protein_dicts.append({
                 'protein_id': protein.id,
                 'taxon_id': taxon.id,
