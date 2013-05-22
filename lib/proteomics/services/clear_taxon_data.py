@@ -64,6 +64,9 @@ class ClearTaxonDataTask(object):
         # Delete Taxon
         self.session.query(Taxon).filter(Taxon.id == taxon.id).delete()
 
+        # Commit the deletes.
+        self.session.commit()
+
     def get_child_logger(self, name=None, base_msg=None, parent_logger=None):
         if not parent_logger:
             parent_logger = self.logger
