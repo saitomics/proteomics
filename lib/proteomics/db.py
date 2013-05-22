@@ -72,23 +72,6 @@ metadata = MetaData()
 
 tables = {}
 
-tables['File'] = Table(
-    'file', metadata,
-    Column('id', String, primary_key=True),
-    Column('basename', String),
-)
-mapper(models.File, tables['File'])
-
-tables['FileDigest'] = Table(
-    'file_digest', metadata,
-    Column('file_id', String, ForeignKey('file.id'), primary_key=True),
-    Column('digest_id', Integer, ForeignKey('digest.id'), primary_key=True),
-)
-mapper(models.FileDigest, tables['FileDigest'], properties={
-    'file': relationship(models.File),
-    'digest': relationship(models.Digest)
-})
-
 tables['Taxon'] = Table(
     'taxon', metadata,
     Column('id', String, primary_key=True),

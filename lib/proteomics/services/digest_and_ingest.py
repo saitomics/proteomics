@@ -1,4 +1,4 @@
-from proteomics.models import (File, FileDigest, Taxon, Protein, 
+from proteomics.models import (Taxon, Protein, 
                                TaxonProtein, ProteinDigest, Peptide, 
                                ProteinDigestPeptide, TaxonDigestPeptide, 
                                TaxonDigest, Digest, Protease)
@@ -49,24 +49,6 @@ class DigestAndIngestTask(object):
         file_logger = self.get_child_logger(id(path), base_msg,
                                             self.logger)
 
-        # Get or create File object.
-        checksum = self.get_checksum(path)
-        file_ = File(id=checksum, basename=os.path.basename(path))
-        file_ = self.session.merge(file_)
-
-        # If digest has been run on this file, don't do anything.
-        if self.session.query(FileDigest).get((file_.id, self.digest.id)):
-            file_logger.info((
-                "File '%s' has already been digested with"
-                " digest '%s', skipping."
-            ) % (path, self.digest))
-            return
-        # Otherwise create a new file digest.
-        else:
-            file_digest = FileDigest(file_, self.digest)
-            self.session.add(file_digest)
-            self.session.commit()
-
         # Get taxon from filename.
         taxon_id = os.path.splitext(os.path.basename(path))[0]
 
@@ -79,12 +61,22 @@ class DigestAndIngestTask(object):
             self.stats['Taxon'] += 1
             file_logger.info("Created taxon '%s'" % taxon_id)
 
-        # Get taxon digest object from db or create a new one.
+        # Check if TaxonDigest record exists in db.
         taxon_digest = (
             self.session.query(TaxonDigest)
             .filter(TaxonDigest.taxon == taxon)
             .filter(TaxonDigest.digest == self.digest)
         ).first()
+
+        # If digest has been run on this taxon, don't do anything.
+        if taxon_digest:
+            file_logger.info((
+                "Taxon '%s' has already been digested with"
+                " digest '%s', skipping."
+            ) % (taxon_id, self.digest))
+            return
+
+        # Otherwise create a new TaxonDigest.
         if not taxon_digest:
             taxon_digest = TaxonDigest(taxon=taxon, digest=self.digest)
             self.session.add(taxon_digest)
