@@ -49,8 +49,8 @@ def main():
         taxon_ids = args.taxon_ids
 
     if not taxon_ids:
-        logger.error("No taxon ids were given, exiting.")
-        exit()
+        argparser.error("Provide taxon_ids via the --taxon-ids option, or the" 
+                        " --taxon-ids-file option")
 
     # Confirm deletion w/ the user.
     print "You are about to delete the following taxons:\n"
