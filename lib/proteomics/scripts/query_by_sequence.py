@@ -37,7 +37,7 @@ argparser.add_argument('--max-distance', type=int, nargs='?', default=0,
 argparser.add_argument('--sequence-file', help=(
     'File containing one amino acid sequence per line.'))
 
-argparser.add_argument('sequence', nargs='?', help='Amino acid sequence')
+argparser.add_argument('--sequence', help='Amino acid sequence')
 
 """
 Main method.
@@ -70,6 +70,10 @@ def main():
             sequences = [line.strip() for line in f.readlines()]
     elif args.sequence:
         sequences = [args.sequence]
+
+    if not sequences:
+        argparser.error("Provide a query sequence via the '--sequence' option, "
+                        "or a set of sequences via the --sequence-file option")
 
     # Print headers. 
     headers = ['query', 'taxon', 'lev_distance', 'match']
