@@ -9,6 +9,10 @@ authorship: adorsk, 2013-05
 
 description: This script queries a peptides database for the given set of
 peptide sequences.
+
+Outputs: a CSV document to stdout whose rows contains:
+    query_sequence | taxon_id | levenshtein_distance | match_sequence
+
 Assumptions:
     - The 'SQLITE_LEVENSHTEIN' environment variable is set to the path to the
     sqlite levenshtein extension.
