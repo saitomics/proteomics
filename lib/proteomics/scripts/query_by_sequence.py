@@ -34,8 +34,11 @@ argparser.add_argument('--max-distance', type=int, nargs='?', default=0,
                        help=(
                            'List of FASTA files containing protein sequences.'
                        ))
-argparser.add_argument('sequence_file', help=(
+argparser.add_argument('--sequence-file', help=(
     'File containing one amino acid sequence per line.'))
+
+argparser.add_argument('sequence', nargs='?', help='Amino acid sequence')
+
 """
 Main method.
 """
@@ -62,8 +65,11 @@ def main():
 
     # Read in sequences to query.
     sequences = []
-    with open(args.sequence_file, 'rb') as f:
-        sequences = [line.strip() for line in f.readlines()]
+    if args.sequence_file:
+        with open(args.sequence_file, 'rb') as f:
+            sequences = [line.strip() for line in f.readlines()]
+    elif args.sequence:
+        sequences = [args.sequence]
 
     # Print headers. 
     headers = ['query', 'taxon', 'lev_distance', 'match']
