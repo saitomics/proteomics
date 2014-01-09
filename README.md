@@ -1,9 +1,18 @@
-Saito Lab: Computation Proteomics Tools
+Saito Lab: Computational Proteomics Tools
 ==============
 
 This document describes how to use computational proteomics tools developed for the Saito lab.
 
-## 1. Installation
+## General System Description
+The redundancy analysis tools consist of:
+
+1): a database, stored in a standalone SQLite file.  
+2): python libraries, for processing, ingesting, and analyzing data 
+3): command-line scripts, to act as interfaces to the python libraries and the database.
+
+Please note that this is *not* designed as a high-performance/high-volume solution; Instead it is intended to function as a quick-and-easy testing bed for doing computational analyses of proteomics data.
+
+## Installation
 
 These instructions assume that you are running within a unix environment that has python2.7 .
 
@@ -14,7 +23,7 @@ These instructions assume that you are running within a unix environment that ha
 5. **Initialize the Database**: Run this command: ````bin/initialize_db.sh```` . This will create a database file named 'proteomics.db.sqlite'.
 6 (optional). **Install the sqlite3 command-line client**: If you wish run your own SQL queries on the protein db, it is recommended that you install the sqlite3 client. This should be possible through your system's package manager. E.g. on Ubuntu, the command to do this would look like ````sudo apt-get install sqlite3````.
 
-## 2. Quick Usage Guide
+## Quick Usage Guide
 
 ### 1: Digest and ingest data
 1. Run the script bin/digest_and_ingest.sh with FASTA proteome files you wish to digest and ingest. e.g.:
@@ -56,17 +65,6 @@ If you wish to **delete** data for a given set of taxa in the db, run a command 
 ````
 bin/clear_taxon_data.sh --taxon-ids croc5801
 ````
-
-----------
-
-## General System Description
-The redundancy analysis tools consist of:
-
-1): a database, stored in a standalone SQLite file.  
-2): python libraries, for processing, ingesting, and analyzing data 
-3): commandline scripts, to act as interfaces to the python libraries and the 
-    database.
-----------
 
 
 ## Using the Database
