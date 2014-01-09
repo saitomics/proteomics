@@ -4,7 +4,16 @@ Saito Lab: Computational Proteomics Tools
 This document describes how to use computational proteomics tools developed for the Saito lab.
 
 ## General System Description
-The redundancy analysis tools consist of:
+The purpose of these tools is to help researchers answer questions about proteomics data. 
+
+Some specific questions that these tools help provide answers for include:
+
+- Is protein XXX found in Proteome A and Proteome B?
+- How many proteins do Proteome A and Proteome B have in common?
+- Are proteins XXX and YYY both found in Proteome A?
+- How many proteins are there in Proteome A that differ from protein XXX by n positions?
+
+The analysis tools consist of:
 
 1): a database, stored in a standalone SQLite file.  
 2): python libraries, for processing, ingesting, and analyzing data 
