@@ -2,7 +2,7 @@ import unittest
 from proteomics import db
 from proteomics.models import Protease, Digest
 from proteomics.services.digest_and_ingest import DigestAndIngestTask
-from pyteomics.parser import expasy_rules
+from proteomics.config import CLEAVAGE_RULES as expasy_rules
 from sqlalchemy import create_engine
 import tempfile
 import os

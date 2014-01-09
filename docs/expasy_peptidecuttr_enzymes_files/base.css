@@ -1,0 +1,90 @@
+/** CSS for GENEVIAN RESOURCES **/
+
+/** ================================================================= **/
+/** 			sib_css REDEFINITIONS 							      **/
+/** ================================================================= **/
+
+#sib_body {
+	background: none;
+	font-size: medium;
+}
+
+#sib_body table, td, th {
+	border: none;
+}
+
+/* White background */
+#sib_container {
+        background-color: #fff;
+}
+
+/* In header, keep color of visited link */
+#sib_header_small a:visited, #sib_header_small a:hover, #sib_header_small a, #sib_header a:visited, #sib_header a:hover, #sib_header a {
+        color: #282828 ;   /* Grey */
+        text-decoration: none;
+}
+
+#sib_header_nav {
+        right: 10px !important;
+}
+
+#sib_header_nav a:hover  {
+        color:#282828 !important;
+}
+
+#sib_header_nav a  {
+        color:#555555 !important;
+        font-size:12px !important;
+        margin: 10px ;
+}
+
+#sib_header_small h1, #sib_header h1 {
+	margin: auto;
+}
+
+#sib_footer {
+	position: relative;
+	clear: both !important ;
+}
+
+#sib_footer a:visited {
+        text-decoration: none;
+        color: #f7f8fa;
+}
+
+#sib_expasy_logo {
+	z-index: 1;
+}
+
+/** ================================================================= **/
+/**						LOCAL DEFINITIONS     **/
+/** ================================================================= **/
+
+/* ----------- LINKS ------------------------------------------------- */
+a:link {
+	color: #002bb8;		/* Blue */
+	text-decoration: none;
+}
+
+a:visited {
+	color: #660099;		/* Purple */
+	text-decoration: none;
+}
+
+a:hover {
+	color: #002bb8;		/* Blue */
+	text-decoration: underline;
+}
+
+a img { 
+	border-width: 0pt; 
+}
+
+/* ----- DISPLAY NONE ------------------------------------------------- */
+.hidden {
+	display: none;
+}
+
+input.mandatory {
+	display: none;
+}

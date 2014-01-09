@@ -4,7 +4,7 @@ from proteomics.models import (Protease, Digest, TaxonDigest,
                                TaxonDigestPeptide, TaxonProtein, Taxon)
 from proteomics.services.digest_and_ingest import DigestAndIngestTask
 from proteomics.services.clear_taxon_data import ClearTaxonDataTask
-from pyteomics.parser import expasy_rules
+from proteomics.config import CLEAVAGE_RULES as expasy_rules
 from sqlalchemy import create_engine
 import tempfile
 import os

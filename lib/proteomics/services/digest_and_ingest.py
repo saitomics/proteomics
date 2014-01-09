@@ -6,7 +6,7 @@ from proteomics import db
 from proteomics.util.digest import cleave
 from proteomics.util.logging_util import LoggerLogHandler
 from proteomics.util.mass import get_aa_sequence_mass
-from pyteomics import fasta
+from proteomics.util import fasta
 import os
 import hashlib
 import logging
