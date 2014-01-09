@@ -1,10 +1,11 @@
 Saito Lab: Computational Proteomics Tools
 ==============
 
-This document describes how to use computational proteomics tools developed for the Saito lab.
+This repository contains a set of computational tools for analyzing proteomics data.
 
 ## General System Description
-The purpose of these tools is to help researchers answer questions about proteomics data. 
+
+These tools are intended to help researchers answer questions about proteomics data. 
 
 Some specific questions that these tools help provide answers for include:
 
