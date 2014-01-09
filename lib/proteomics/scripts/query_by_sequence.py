@@ -12,10 +12,6 @@ peptide sequences.
 
 Outputs: a CSV document to stdout whose rows contains:
     query_sequence | taxon_id | levenshtein_distance | match_sequence
-
-Assumptions:
-    - The 'SQLITE_LEVENSHTEIN' environment variable is set to the path to the
-    sqlite levenshtein extension.
 """
 
 """
@@ -53,16 +49,26 @@ def main():
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.INFO)
 
-    # Load Sqlite levenshtein extension.
+    # Define levenshtein function in SQLite.
     try:
+        def levenshtein(s1,s2):
+            l1 = len(s1)
+            l2 = len(s2)
+            matrix = [range(l1 + 1)] * (l2 + 1)
+            for zz in range(l2 + 1):
+              matrix[zz] = range(zz,zz + l1 + 1)
+            for zz in range(0,l2):
+              for sz in range(0,l1):
+                if s1[sz] == s2[zz]:
+                  matrix[zz+1][sz+1] = min(matrix[zz+1][sz] + 1, matrix[zz][sz+1] + 1, matrix[zz][sz])
+                else:
+                  matrix[zz+1][sz+1] = min(matrix[zz+1][sz] + 1, matrix[zz][sz+1] + 1, matrix[zz][sz] + 1)
+            return matrix[l2][l1]
+
         connection = db.get_connection()
-        connection.connection.enable_load_extension(True)
-        connection.execute("SELECT load_extension('%s')" % (
-            os.environ['SQLITE_LEVENSHTEIN']))
+        connection.connection.create_function("LEVENSHTEIN", 2, levenshtein)
     except Exception as e:
-        logger.exception('Could not load Sqlite Levenshtein extension. '
-                         'SQLITE_LEVENSHTEIN environment variable must contain '
-                         'path to levenshtein extension.')
+        logger.exception('Could not define Levenshtein distance function: %s' % e)
         raise e
 
     session = db.get_session(bind=connection)

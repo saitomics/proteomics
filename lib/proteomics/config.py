@@ -1,3 +1,5 @@
+import os
+
 # These cleavage rules are taken from:
 # http://web.expasy.org/peptide_cutter/peptidecutter_enzymes.html,
 # Included in this repo as docs/expasy_peptidecuttr_enzymes.html
@@ -80,4 +82,11 @@ DEFAULT_DIGEST_DEFINITION = {
     'min_acids': 6,
 }
 
-from secrets import *
+SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.environ.get(
+    'PROTEOMICS_DB', '/tmp/testProteomics.db.sqlite')
+
+# secrets.py (if it exists) can override any of the items above.
+try:
+    from .secrets import *
+except:
+    pass
