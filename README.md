@@ -9,10 +9,10 @@ These tools are intended to help researchers answer questions about proteomics d
 
 Some specific questions that these tools help provide answers for include:
 
-- Is protein XXX found in Proteome A and Proteome B?
-- How many proteins do Proteome A and Proteome B have in common?
-- Are proteins XXX and YYY both found in Proteome A?
-- How many proteins are there in Proteome A that differ from protein XXX by n positions?
+- Is tryptic peptide XXX found in Proteome A and Proteome B?
+- How many tryptic peptides do Proteome A and Proteome B have in common?
+- Are tryptic peptides XXX and YYY both found in Proteome A?
+- How many tryptic peptides are there in Proteome A that differ from peptide XXX by n positions?
 
 The analysis tools consist of:
 
