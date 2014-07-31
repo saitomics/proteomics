@@ -39,6 +39,7 @@ These instructions assume that you are running within a unix environment that ha
 1. Run the script bin/digest_and_ingest.sh with FASTA proteome files you wish to digest and ingest. e.g.:
 ````
 bin/digest_and_ingest.sh file1.fasta file2.fasta ...
+````
 
 This script reads the FASTA files, and runs digestions on their sequences. You should see a fair amount of output as these files are processed.
 
