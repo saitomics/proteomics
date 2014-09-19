@@ -31,7 +31,7 @@ These instructions assume that you are running within a unix environment that ha
 3. **Install dependencies via pip**: Still in the same directory, run this command: ````bin/install_requirements.sh````. This will install other python libraries that are necessary for these tools to work. (currently, just the SqlAlchemy library).
 4. **Run the tests**: Check that everything works by running this commmand: ````bin/run_tests.sh```` . You should see a bunch of output, with the last line reading 'OK'.
 5. **Initialize the Database**: Run this command: ````bin/initialize_db.sh```` . This will create a database file named 'proteomics.db.sqlite'.
-6 (optional). **Install the sqlite3 command-line client**: If you wish run your own SQL queries on the protein db, it is recommended that you install the sqlite3 client. This should be possible through your system's package manager. E.g. on Ubuntu, the command to do this would look like ````sudo apt-get install sqlite3````.
+6. (optional). **Install the sqlite3 command-line client**: If you wish run your own SQL queries on the protein db, it is recommended that you install the sqlite3 client. This should be possible through your system's package manager. E.g. on Ubuntu, the command to do this would look like ````sudo apt-get install sqlite3````.
 
 ## Quick Usage Guide
 
