@@ -109,11 +109,13 @@ The goals of the schema are:
 
 #### taxon
 description: taxon proteome record
+
 columns:
 - id
 
 #### protein
 description: canonical protein records
+
 columns:
 - id
 - sequence (notated as amino acid residues)
@@ -121,6 +123,7 @@ columns:
 
 #### taxon_protein
 description: records if taxon proteome X contains protein Y
+
 columns:
 - id
 - taxon_id (foreign key to taxon.id)
@@ -130,6 +133,7 @@ columns:
 
 #### peptide
 description: canonical peptide records
+
 columns:
 - id
 - sequence (in amino acid residues)
@@ -137,6 +141,7 @@ columns:
 
 #### protease
 description: protease records
+
 columns: 
 - id
 - cleavage_rule (rule for how this protease cleaves an amino acid sequence.
@@ -153,6 +158,7 @@ columns:
 
 #### taxon_digest
 description: records whether taxon proteome X has been digested with digest Y
+
 columns:
 - id
 - taxon_id (foreign key to taxon.id)
@@ -160,13 +166,15 @@ columns:
 
 #### protein_digest
 description: records whether protein X has been digested with digest Y
-columns:
+
+olumns:
 - id
 - protein_id (foreign key to protein.id)
 - digest_id (foreign key to digest.id)
 
 #### protein_digest_peptide
 description: records if petide X is a product of protein_digest Y
+
 columns:
 - id
 - peptide_id (foreign key to peptide.id)
@@ -175,6 +183,7 @@ columns:
 
 #### protein_digest_peptide
 description: records if petide X is a product of taxon_digest Y
+
 columns:
 - id
 - peptide_id (foreign key to peptide.id)
