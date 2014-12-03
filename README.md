@@ -55,6 +55,12 @@ bin/list_taxon_ids.sh
 bin/generate_redundancy_tables.sh --taxon-ids syn8102 syn7502 syn7503 --output-dir exampleRedundancyTables
 ````
 
+Note that you can also specify a file that contains a list of taxon IDs, e.g
+
+````
+bin/generate_redundancy_tables.sh --taxon-id-file taxon_id_list.txt --output-dir exampleRedundancyTables
+````
+
 3.: View resulting files in exampleRedundancyTables
     - counts.csv contains counts of redundant peptides
     - percents.csv contains the values in counts.csv, divided by the number of unique peptides in the *union* of digestions of a taxa pair.
